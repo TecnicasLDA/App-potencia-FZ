@@ -1,0 +1,210 @@
+﻿Archivo: C:\Users\jaruani\Downloads\Python\App de potencia\GRAFICOS DE POTENCIAS 2026-MARZO.xlsx
+COM disponible: True
+
+1) Hojas y UsedRange:
+- GRAFICO ENE (ACE): filas=113, columnas=6
+- GRAFICO ENE (ALT): filas=113, columnas=6
+- GRAFICO ENE (VF): filas=112, columnas=6
+- GRAFICO ENE (SR): filas=113, columnas=6
+- GRAFICO ENE (BSJ): filas=114, columnas=7
+- GRAFICO POT: filas=76, columnas=3
+- GRAFICO ENE: filas=61, columnas=2
+- DINERO: filas=23, columnas=2
+- ENERGÍA: filas=18, columnas=4
+- ENERGIA 4: filas=17, columnas=3
+- Hoja6: filas=97, columnas=34
+- Hoja5: filas=12, columnas=8
+- INDICADOR: filas=32, columnas=31
+- ENERGIA 2 KW-H: filas=20, columnas=4
+- ENERGIA 3 $: filas=20, columnas=3
+- BASE DATOS: filas=4470, columnas=34
+- REFENCIAS NIC: filas=106, columnas=6
+
+2) Tablas (ListObjects):
+- Hoja Hoja6 | Tabla Tabla2 | Rango A1:AH97
+- Hoja BASE DATOS | Tabla Tabla1 | Rango A1:AH4470
+
+3) Tablas dinámicas (PivotTables):
+- Hoja GRAFICO ENE (ACE) | Pivot TablaDinámica3 | Rango A77:C84
+  Row: 
+  Column: Años
+  Data: 
+  Filter: NIC, F_LECT_ANT, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (ACE) | Pivot TablaDinámica1 | Rango A1:C19
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (ACE) | Pivot TablaDinámica4 | Rango A95:C113
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (ALT) | Pivot TablaDinámica3 | Rango A77:C84
+  Row: 
+  Column: Años
+  Data: 
+  Filter: NIC, F_LECT_ANT, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (ALT) | Pivot TablaDinámica4 | Rango A95:C111
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (ALT) | Pivot TablaDinámica1 | Rango A1:C17
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (VF) | Pivot TablaDinámica4 | Rango A95:C112
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (VF) | Pivot TablaDinámica3 | Rango A77:C84
+  Row: 
+  Column: Años
+  Data: 
+  Filter: NIC, F_LECT_ANT, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (VF) | Pivot TablaDinámica1 | Rango A1:C18
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (SR) | Pivot TablaDinámica1 | Rango A1:C12
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (SR) | Pivot TablaDinámica3 | Rango A77:C84
+  Row: 
+  Column: Años
+  Data: 
+  Filter: NIC, F_LECT_ANT, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (SR) | Pivot TablaDinámica4 | Rango A95:C106
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (BSJ) | Pivot TablaDinámica3 | Rango A77:D84
+  Row: 
+  Column: Años
+  Data: 
+  Filter: NIC, F_LECT_ANT, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (BSJ) | Pivot TablaDinámica1 | Rango A1:D19
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE (BSJ) | Pivot TablaDinámica4 | Rango A95:D113
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO POT | Pivot TablaDinámica2 | Rango A1:C76
+  Row: F_LECT_ANT, Años
+  Column: Valores
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja GRAFICO ENE | Pivot TablaDinámica1 | Rango A1:B61
+  Row: F_LECT_ANT, Años
+  Column: 
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja DINERO | Pivot TablaDinámica1 | Rango A1:B19
+  Row: F_LECT_ANT, Años
+  Column: 
+  Data: 
+  Filter: NIC, REFERENCIA, TIPO
+- Hoja ENERGÍA | Pivot TablaDinámica4 | Rango A1:D18
+  Row: SECTRO MACRO
+  Column: F_LECT_ANT, Años
+  Data: 
+  Filter: TARIFA RA
+- Hoja ENERGIA 4 | Pivot TablaDinámica7 | Rango A1:C17
+  Row: SECTRO MACRO
+  Column: F_LECT_ANT, Años
+  Data: 
+  Filter: TARIFA RA
+- Hoja Hoja5 | Pivot TablaDinámica8 | Rango A2:H13
+  Row: F_LECT_ANT
+  Column: Años
+  Data: 
+  Filter: REFERENCIA, TARIFA RA, SECTRO MACRO
+- Hoja ENERGIA 2 KW-H | Pivot TablaDinámica5 | Rango A1:C20
+  Row: REFERENCIA
+  Column: F_LECT_ANT, Años
+  Data: 
+  Filter: TARIFA RA, SECTRO MACRO
+- Hoja ENERGIA 3 $ | Pivot TablaDinámica6 | Rango A1:C20
+  Row: REFERENCIA
+  Column: F_LECT_ANT, Años
+  Data: 
+  Filter: TARIFA RA, SECTRO MACRO
+
+4) Coincidencias de fórmulas por palabras clave:
+- NIC: 13407
+- POT_DEMANDADA: 4469
+- MAX: 4469
+- POT_FACT_LLANO: 4469
+
+5) 20 fórmulas representativas:
+- GRAFICO ENE (ACE)!F62 => =131040/92460
+- GRAFICO ENE (ACE)!F64 => =175510/139721
+- GRAFICO ENE (ACE)!F67 => =291888*0.96
+- GRAFICO ENE (ALT)!F62 => =131040/92460
+- GRAFICO ENE (ALT)!F64 => =291888/281880
+- GRAFICO ENE (ALT)!F67 => =291888*0.96
+- GRAFICO ENE (VF)!F62 => =131040/92460
+- GRAFICO ENE (SR)!F62 => =131040/92460
+- INDICADOR!H2 => =E2/B2
+- INDICADOR!I2 => =F2/C2
+- INDICADOR!H3 => =E3/B3
+- INDICADOR!I3 => =F3/C3
+- INDICADOR!J2 => =G2/D2
+- INDICADOR!J3 => =G3/D3
+- INDICADOR!J4 => =G4/D4
+- INDICADOR!W8 => =U8/V8
+- INDICADOR!W9 => =U9/V9
+- INDICADOR!W10 => =U10/V10
+- INDICADOR!W11 => =U11/V11
+- INDICADOR!W12 => =U12/V12
+
+6) Segmentación NIC por tablas de referencia:
+- Hoja Hoja6 | Tabla Tabla2 | Rango A1:AH97
+  Columnas: NIC, CLIENTE, DOMICILIO_SUMINISTRO, LOCALIDAD, DEPARTAMENTO, COD_POSTAL, REF_DIRECCION, NRO_FACTURA, F_VCTO_FAC, F_LECT_ANT, F_LECT_ACT, PERIODO, TARIFA, IMPORTE_NETO, IMPORTE_IVA, IMPORTE_TOTAL, COBRADO, CSMO_FACT, CSMO_FACT_PUNTA, CSMO_FACT_VALLE, CSMO_FACT_LLANO, POT_CONTRATADA, POT_DEMANDADA, POT_FACT_PUNTA, POT_FACT_VALLE, POT_FACT_LLANO, COS_FI, BAJO_FACTOR_POTENCIA, EXCESO_POTENCIA, MAX POT, REFERENCIA, TIPO, TARIFA RA, SECTRO MACRO
+  Uso en fórmulas: sin evidencia directa en la muestra.
+  Uso en pivots (muestra):
+    * GRAFICO ENE (ACE) | TablaDinámica3 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ACE) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ACE) | TablaDinámica4 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ALT) | TablaDinámica3 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ALT) | TablaDinámica4 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ALT) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (VF) | TablaDinámica4 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (VF) | TablaDinámica3 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (VF) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (SR) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
+- Hoja BASE DATOS | Tabla Tabla1 | Rango A1:AH4470
+  Columnas: NIC, CLIENTE, DOMICILIO_SUMINISTRO, LOCALIDAD, DEPARTAMENTO, COD_POSTAL, REF_DIRECCION, NRO_FACTURA, F_VCTO_FAC, F_LECT_ANT, F_LECT_ACT, PERIODO, TARIFA, IMPORTE_NETO, IMPORTE_IVA, IMPORTE_TOTAL, COBRADO, CSMO_FACT, CSMO_FACT_PUNTA, CSMO_FACT_VALLE, CSMO_FACT_LLANO, POT_CONTRATADA, POT_DEMANDADA, POT_FACT_PUNTA, POT_FACT_VALLE, POT_FACT_LLANO, COS_FI, BAJO_FACTOR_POTENCIA, EXCESO_POTENCIA, MAX POT, REFERENCIA, TIPO, TARIFA RA, SECTRO MACRO
+  Uso en fórmulas (muestra):
+    * BASE DATOS!AD2: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD3: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD4: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD5: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD6: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD7: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD8: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD9: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD10: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+    * BASE DATOS!AD11: =MAX(Tabla1[@[POT_DEMANDADA]:[POT_FACT_LLANO]])
+  Uso en pivots (muestra):
+    * GRAFICO ENE (ACE) | TablaDinámica3 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ACE) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ACE) | TablaDinámica4 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ALT) | TablaDinámica3 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ALT) | TablaDinámica4 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (ALT) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (VF) | TablaDinámica4 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (VF) | TablaDinámica3 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (VF) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
+    * GRAFICO ENE (SR) | TablaDinámica1 | Source: 'BASE DATOS'!C1:C34
