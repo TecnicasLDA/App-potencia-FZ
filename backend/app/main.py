@@ -7,9 +7,14 @@ from .database import Base, engine
 from .api import endpoints
 
 # Solo crear tablas automaticamente cuando se habilite explicitamente.
+# Envuelto en try-except para no romper el startup si la BD no responde.
 auto_create_tables = os.getenv("AUTO_CREATE_TABLES", "false").lower() == "true"
 if auto_create_tables:
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Advertencia: No se pudieron crear tablas al startup: {e}")
+        print("Ejecutá ingest_data.py para crear el esquema e insertar datos.")
 
 # Inicializar FastAPI
 app = FastAPI(

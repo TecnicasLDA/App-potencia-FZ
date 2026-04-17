@@ -12,7 +12,7 @@ services:
       - key: CORS_ORIGINS
         sync: false
       - key: AUTO_CREATE_TABLES
-        value: true
+        value: "false"
       - key: PYTHON_VERSION
         value: 3.11.9
 
