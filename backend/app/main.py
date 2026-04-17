@@ -1,13 +1,15 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-import os
 
 from .database import Base, engine
 from .api import endpoints
 
-# Crear tablas
-Base.metadata.create_all(bind=engine)
+# Solo crear tablas automaticamente cuando se habilite explicitamente.
+auto_create_tables = os.getenv("AUTO_CREATE_TABLES", "false").lower() == "true"
+if auto_create_tables:
+    Base.metadata.create_all(bind=engine)
 
 # Inicializar FastAPI
 app = FastAPI(
