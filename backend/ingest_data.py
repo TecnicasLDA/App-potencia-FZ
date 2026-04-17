@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 from sqlalchemy.orm import Session
-from app.database import SessionLocal, engine
+from app.database import Base, SessionLocal, engine
 from app import models, schemas, crud
 
 
@@ -312,6 +312,8 @@ if __name__ == "__main__":
     
     db = SessionLocal()
     try:
+        # Inicializar esquema en despliegues nuevos (Neon/Render) antes de insertar.
+        Base.metadata.create_all(bind=engine)
         ingestar_csv(str(csv_path), db)
         print("✓ Ingesta completada exitosamente")
     except Exception as e:
