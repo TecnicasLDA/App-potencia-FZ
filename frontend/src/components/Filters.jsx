@@ -18,7 +18,11 @@ export default function Filters({ filtros, setFiltros, onLoading, onError }) {
 
   // Cargar filtros cascada cuando cambien sector_macro, sector o denominacion
   useEffect(() => {
-    if (filtros.sectorMacro || filtros.sector || filtros.denominacion) {
+    if (
+      filtros.sectorMacro !== '*' ||
+      filtros.sector !== '*' ||
+      filtros.denominacion !== '*'
+    ) {
       cargarFiltrosCascada()
     }
   }, [filtros.sectorMacro, filtros.sector, filtros.denominacion])

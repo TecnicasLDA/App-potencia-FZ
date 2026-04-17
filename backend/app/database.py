@@ -7,8 +7,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configurar conexión a PostgreSQL
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/potencia_db")
+# Configurar conexión a PostgreSQL.
+# En Render/Neon esto debe venir por variable de entorno; no usar fallback silencioso.
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL no está configurada")
 
 engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
