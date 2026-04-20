@@ -16,10 +16,20 @@ export default function PotencyChart({ nic, nombreReferencia, fechaInicio, fecha
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState(null)
+  const [isMobile, setIsMobile] = useState(false)
   const [infoGrafico, setInfoGrafico] = useState({
     referencia: '',
     combinacion: '',
   })
+
+  useEffect(() => {
+    const updateIsMobile = () => {
+      setIsMobile(window.innerWidth <= 760)
+    }
+    updateIsMobile()
+    window.addEventListener('resize', updateIsMobile)
+    return () => window.removeEventListener('resize', updateIsMobile)
+  }, [])
 
   useEffect(() => {
     if (nic) {
@@ -71,6 +81,17 @@ export default function PotencyChart({ nic, nombreReferencia, fechaInicio, fecha
     return value !== null && value !== undefined ? `${value.toFixed(2)} kW` : 'N/A'
   }
 
+  const formatMesLabel = (value) => {
+    if (!value || typeof value !== 'string' || !value.includes('/')) {
+      return value
+    }
+    const [mes, anio] = value.split('/')
+    if (!isMobile) {
+      return value
+    }
+    return `${mes}/${anio.slice(-2)}`
+  }
+
   return (
     <div className="grafico-container">
       <h2 className="grafico-titulo">
@@ -92,18 +113,22 @@ export default function PotencyChart({ nic, nombreReferencia, fechaInicio, fecha
           Cargando datos del gráfico...
         </div>
       ) : datos && datos.length > 0 ? (
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
           <ComposedChart data={datos} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(173, 198, 255, 0.2)" />
             <XAxis 
               dataKey="mes_label"
               stroke="#9aa8ba"
-              style={{fontSize: '0.875rem'}}
+              tickFormatter={formatMesLabel}
+              minTickGap={isMobile ? 28 : 10}
+              interval="preserveStartEnd"
+              style={{fontSize: isMobile ? '0.75rem' : '0.875rem'}}
             />
             <YAxis 
-              label={{ value: 'Potencia (kW)', angle: -90, position: 'insideLeft' }}
+              label={isMobile ? undefined : { value: 'Potencia (kW)', angle: -90, position: 'insideLeft' }}
+              width={isMobile ? 38 : 50}
               stroke="#9aa8ba"
-              style={{fontSize: '0.875rem'}}
+              style={{fontSize: isMobile ? '0.75rem' : '0.875rem'}}
             />
             <Tooltip 
               formatter={formatoTooltip}
@@ -111,13 +136,13 @@ export default function PotencyChart({ nic, nombreReferencia, fechaInicio, fecha
                 backgroundColor: 'rgba(20, 27, 36, 0.96)',
                 border: '1px solid rgba(173, 198, 255, 0.26)',
                 borderRadius: '10px',
-                padding: '10px',
+                padding: isMobile ? '8px' : '10px',
                 color: '#e8ecf2',
               }}
               labelStyle={{ color: '#a5b2c3' }}
             />
             <Legend 
-              wrapperStyle={{paddingTop: '20px'}}
+              wrapperStyle={{paddingTop: '16px', fontSize: isMobile ? '0.75rem' : '0.9rem'}}
               formatter={(value) => {
                 if (value === 'pot_contratada') return 'Potencia Contratada'
                 if (value === 'pot_demandada_max') return 'Potencia Demandada (Máx.)'
@@ -133,7 +158,7 @@ export default function PotencyChart({ nic, nombreReferencia, fechaInicio, fecha
               stroke="#ffcf95"
               strokeWidth={1}
               radius={[4, 4, 0, 0]}
-              maxBarSize={18}
+              maxBarSize={isMobile ? 12 : 18}
             />
 
             <Line
