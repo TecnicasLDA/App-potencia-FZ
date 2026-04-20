@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import apiClient from '../apiClient'
 import {
-  LineChart,
+  ComposedChart,
+  Bar,
   Line,
   XAxis,
   YAxis,
@@ -11,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-export default function PotencyChart({ nic, nombreReferencia, loading, onLoading }) {
+export default function PotencyChart({ nic, nombreReferencia, fechaInicio, fechaFin, loading, onLoading }) {
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState(null)
@@ -22,17 +23,31 @@ export default function PotencyChart({ nic, nombreReferencia, loading, onLoading
 
   useEffect(() => {
     if (nic) {
-      cargarDatosGrafico(nic)
+      cargarDatosGrafico(nic, fechaInicio, fechaFin)
     }
-  }, [nic])
+  }, [nic, fechaInicio, fechaFin])
 
-  const cargarDatosGrafico = async (nicValue) => {
+  const cargarDatosGrafico = async (nicValue, fechaInicioValue, fechaFinValue) => {
     try {
       setCargando(true)
       onLoading(true)
       setError(null)
 
-      const response = await apiClient.get(`/grafico/${nicValue}`)
+      if (fechaInicioValue && fechaFinValue && fechaInicioValue > fechaFinValue) {
+        setError('La fecha desde no puede ser mayor a la fecha hasta.')
+        setDatos([])
+        return
+      }
+
+      const params = {}
+      if (fechaInicioValue) {
+        params.fecha_inicio = fechaInicioValue
+      }
+      if (fechaFinValue) {
+        params.fecha_fin = fechaFinValue
+      }
+
+      const response = await apiClient.get(`/grafico/${nicValue}`, { params })
       
       setDatos(response.data.data || [])
       setInfoGrafico({
@@ -78,26 +93,28 @@ export default function PotencyChart({ nic, nombreReferencia, loading, onLoading
         </div>
       ) : datos && datos.length > 0 ? (
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={datos} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <ComposedChart data={datos} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(173, 198, 255, 0.2)" />
             <XAxis 
               dataKey="mes_label"
-              stroke="#888"
+              stroke="#9aa8ba"
               style={{fontSize: '0.875rem'}}
             />
             <YAxis 
               label={{ value: 'Potencia (kW)', angle: -90, position: 'insideLeft' }}
-              stroke="#888"
+              stroke="#9aa8ba"
               style={{fontSize: '0.875rem'}}
             />
             <Tooltip 
               formatter={formatoTooltip}
               contentStyle={{
-                backgroundColor: '#fafafa',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                padding: '8px',
+                backgroundColor: 'rgba(20, 27, 36, 0.96)',
+                border: '1px solid rgba(173, 198, 255, 0.26)',
+                borderRadius: '10px',
+                padding: '10px',
+                color: '#e8ecf2',
               }}
+              labelStyle={{ color: '#a5b2c3' }}
             />
             <Legend 
               wrapperStyle={{paddingTop: '20px'}}
@@ -107,27 +124,29 @@ export default function PotencyChart({ nic, nombreReferencia, loading, onLoading
                 return value
               }}
             />
+
+            <Bar
+              dataKey="pot_demandada_max"
+              name="Potencia Demandada (Máx.)"
+              fill="#ffb961"
+              fillOpacity={0.82}
+              stroke="#ffcf95"
+              strokeWidth={1}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={18}
+            />
+
             <Line
               type="monotone"
               dataKey="pot_contratada"
-              stroke="#8B0000"
-              strokeWidth={2.5}
-              dot={{fill: '#8B0000', r: 4}}
-              activeDot={{r: 6}}
+              stroke="#adc6ff"
+              strokeWidth={3}
+              dot={false}
+              activeDot={false}
               name="Potencia Contratada"
               connectNulls={true}
             />
-            <Line
-              type="monotone"
-              dataKey="pot_demandada_max"
-              stroke="#D4AF37"
-              strokeWidth={2.5}
-              dot={{fill: '#D4AF37', r: 4}}
-              activeDot={{r: 6}}
-              name="Potencia Demandada (Máx.)"
-              connectNulls={true}
-            />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       ) : (
         <div className="loading">
@@ -135,7 +154,7 @@ export default function PotencyChart({ nic, nombreReferencia, loading, onLoading
         </div>
       )}
 
-      <div style={{marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee', fontSize: '0.875rem', color: '#666'}}>
+      <div className="grafico-nota">
         <p><strong>Nota:</strong> La Potencia Contratada se muestra de forma continua mensual (carry-forward trimestral). La Potencia Demandada representa el máximo consumo registrado en el período.</p>
       </div>
     </div>

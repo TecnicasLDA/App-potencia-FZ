@@ -3,11 +3,25 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import date
 from typing import Optional
+import math
 
 from .. import crud, schemas
 from ..database import get_db
 
 router = APIRouter(prefix="/api", tags=["potencia"])
+
+
+def valor_float_json_safe(valor):
+    """Convierte NaN/inf a None para serializacion JSON segura."""
+    if valor is None:
+        return None
+    try:
+        v = float(valor)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(v):
+        return None
+    return v
 
 @router.get("/filtros", response_model=schemas.FiltrosDisponiblesResponse)
 def obtener_filtros_disponibles(db: Session = Depends(get_db)):
@@ -175,8 +189,8 @@ def obtener_datos_grafico(
         data_points.append(schemas.GraficoDataPoint(
             fecha=med.fecha_medicion.isoformat() if med.fecha_medicion else "",
             mes_label=mes_label,
-            pot_contratada=med.pot_contratada,
-            pot_demandada_max=med.pot_demandada_max
+            pot_contratada=valor_float_json_safe(med.pot_contratada),
+            pot_demandada_max=valor_float_json_safe(med.pot_demandada_max)
         ))
     
     return schemas.GraficoResponse(
@@ -191,3 +205,38 @@ def obtener_datos_grafico(
 def salud():
     """Endpoint de healthcheck."""
     return {"estado": "ok", "servicio": "API Potencia"}
+
+
+@router.get("/maestro-nics", response_model=schemas.MaestroNicListResponse)
+def listar_maestro_nics(
+    search: Optional[str] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    """Lista editable de Maestro de NICs (1 registro por NIC)."""
+    try:
+        total, items = crud.obtener_maestro_nics(db, search=search, limit=limit, offset=offset)
+        return schemas.MaestroNicListResponse(total=total, items=items)
+    except SQLAlchemyError as e:
+        db.rollback()
+        print(f"Error DB en /api/maestro-nics: {e}")
+        return schemas.MaestroNicListResponse(total=0, items=[])
+
+
+@router.put("/maestro-nics/{nic}", response_model=schemas.MaestroNicItem)
+def editar_maestro_nic(
+    nic: int,
+    payload: schemas.MaestroNicUpdate,
+    db: Session = Depends(get_db),
+):
+    """Edita datos de maestro para un NIC y sincroniza mediciones."""
+    try:
+        item = crud.actualizar_maestro_nic(db, nic=nic, payload=payload)
+        if not item:
+            return schemas.MaestroNicItem(nic=nic)
+        return item
+    except SQLAlchemyError as e:
+        db.rollback()
+        print(f"Error DB en PUT /api/maestro-nics/{nic}: {e}")
+        return schemas.MaestroNicItem(nic=nic)

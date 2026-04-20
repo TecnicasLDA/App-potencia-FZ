@@ -4,14 +4,15 @@ Aplica lógica de negocio: carry-forward trimestral de POT_CONTRATADA y MAX POT.
 """
 
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple
+from typing import Dict, Optional, Tuple
 import sys
+import os
 from pathlib import Path
+import re
 
 from sqlalchemy.orm import Session
 from app.database import Base, SessionLocal, engine
-from app import models, schemas, crud
+from app import models
 
 
 def resolver_ruta_datos(filename: str) -> Path:
@@ -25,6 +26,136 @@ def resolver_ruta_datos(filename: str) -> Path:
         if candidate.exists():
             return candidate
     return candidates[0]
+
+
+def normalizar_texto(valor: object) -> str:
+    """Normaliza texto para comparar encabezados de forma robusta."""
+    s = str(valor or "").strip().upper()
+    reemplazos = {
+        "Á": "A",
+        "É": "E",
+        "Í": "I",
+        "Ó": "O",
+        "Ú": "U",
+        "Ü": "U",
+        "Ñ": "N",
+        "º": " ",
+        "°": " ",
+    }
+    for origen, destino in reemplazos.items():
+        s = s.replace(origen, destino)
+    s = re.sub(r"[^A-Z0-9]+", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def limpiar_valor_texto(valor: object) -> Optional[str]:
+    if pd.isna(valor):
+        return None
+    texto = str(valor).strip()
+    return texto if texto else None
+
+
+def detectar_columnas_maestro(df: pd.DataFrame) -> Optional[Dict[str, str]]:
+    """Detecta columnas del maestro por encabezado, sin depender de nombre de hoja."""
+    normalizadas = {col: normalizar_texto(col) for col in df.columns}
+
+    def buscar_columna(candidatas):
+        for original, norm in normalizadas.items():
+            if norm in candidatas:
+                return original
+        return None
+
+    col_nic = buscar_columna({"NIC", "N NIC", "NUMERO NIC", "NRO NIC", "NO NIC"})
+    col_sector_macro = buscar_columna({"SECTOR MACRO", "SECTORMACRO"})
+    col_sector = buscar_columna({"SECTOR"})
+    col_denominacion = buscar_columna({"DENOMINACION"})
+    col_tarifa = buscar_columna({"TARIFA"})
+    col_combinacion = buscar_columna({"COMBINACION", "REFERENCIA", "COMBINACION NIC"})
+
+    if not col_nic:
+        return None
+
+    # Aceptar el maestro si al menos aporta una columna de segmentacion.
+    if not any([col_sector_macro, col_sector, col_denominacion, col_combinacion, col_tarifa]):
+        return None
+
+    return {
+        "nic": col_nic,
+        "sector_macro": col_sector_macro,
+        "sector": col_sector,
+        "denominacion": col_denominacion,
+        "tarifa": col_tarifa,
+        "combinacion": col_combinacion,
+    }
+
+
+def cargar_maestro_nics(backend_dir: Path) -> Dict[int, dict]:
+    """Carga maestro de NICs desde CSV/XLSX buscando encabezados estandar."""
+    repo_root = backend_dir.parent
+    candidates = [
+        backend_dir / "MAESTRO_NICS.xlsx",
+        backend_dir / "MAESTRO_NICS.csv",
+        backend_dir / "Maestro de NICs.xlsx",
+        backend_dir / "maestro_nics.xlsx",
+        repo_root / "MAESTRO_NICS.xlsx",
+        repo_root / "MAESTRO_NICS.csv",
+        repo_root / "Maestro de NICs.xlsx",
+        repo_root / "maestro_nics.xlsx",
+        repo_root / "GRAFICOS DE POTENCIAS 2026-MARZO.xlsx",
+    ]
+
+    referencias_dict: Dict[int, dict] = {}
+
+    def agregar_desde_dataframe(df: pd.DataFrame, source_label: str):
+        columnas = detectar_columnas_maestro(df)
+        if not columnas:
+            return 0
+
+        usados = 0
+        for _, row in df.iterrows():
+            nic_val = pd.to_numeric(row.get(columnas["nic"]), errors="coerce")
+            if pd.isna(nic_val):
+                continue
+
+            nic = int(nic_val)
+            if nic <= 0:
+                continue
+
+            referencias_dict[nic] = {
+                "sector": limpiar_valor_texto(row.get(columnas["sector"])) if columnas["sector"] else None,
+                "denominacion": limpiar_valor_texto(row.get(columnas["denominacion"])) if columnas["denominacion"] else None,
+                "tarifa": limpiar_valor_texto(row.get(columnas["tarifa"])) if columnas["tarifa"] else None,
+                "combinacion": limpiar_valor_texto(row.get(columnas["combinacion"])) if columnas["combinacion"] else None,
+                "sector_macro": limpiar_valor_texto(row.get(columnas["sector_macro"])) if columnas["sector_macro"] else None,
+            }
+            usados += 1
+
+        if usados > 0:
+            print(f"Maestro NICs detectado en {source_label}: {usados} filas procesadas")
+        return usados
+
+    for path in candidates:
+        if not path.exists():
+            continue
+
+        try:
+            ext = path.suffix.lower()
+            if ext == ".csv":
+                df = pd.read_csv(path, sep=None, engine="python")
+                agregar_desde_dataframe(df, str(path))
+                if referencias_dict:
+                    return referencias_dict
+            elif ext in {".xlsx", ".xlsm"}:
+                hojas = pd.read_excel(path, sheet_name=None)
+                for nombre_hoja, df in hojas.items():
+                    agregar_desde_dataframe(df, f"{path} [{nombre_hoja}]")
+                if referencias_dict:
+                    return referencias_dict
+        except Exception as e:
+            print(f"Advertencia: no se pudo leer maestro NICs en {path}: {e}")
+
+    print("Advertencia: no se encontró Maestro de NICs con columnas esperadas")
+    return referencias_dict
 
 def parse_periodo(periodo_str: str) -> Tuple[int, int]:
     """Parsea MMYYYY a (mes, año)."""
@@ -170,62 +301,10 @@ def ingestar_csv(csv_path: str, db: Session):
     
     print(f"Filas después de carry-forward: {len(df)}")
     
-    # Cargar tabla de referencias NIC desde Excel (REFENCIAS NIC)
-    # Por ahora, usaremos los datos del CSV para construir referencias
+    # Cargar tabla de referencias NIC desde Maestro (CSV/XLSX).
     print("Construyendo referencias NIC...")
-    referencias_dict: Dict[int, dict] = {}
-    
-    excel_path = resolver_ruta_datos("GRAFICOS DE POTENCIAS 2026-MARZO.xlsx")
-    if excel_path.exists():
-        try:
-            import zipfile
-            import xml.etree.ElementTree as ET
-            
-            ns = {'m': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
-            
-            with zipfile.ZipFile(excel_path) as z:
-                # Leer shared strings
-                sst = []
-                if 'xl/sharedStrings.xml' in z.namelist():
-                    sroot = ET.fromstring(z.read('xl/sharedStrings.xml'))
-                    for si in sroot.findall('m:si', ns):
-                        sst.append(''.join([(t.text or '') for t in si.findall('.//m:t', ns)]))
-                
-                # Leer REFENCIAS NIC
-                ref_sheet_xml = ET.fromstring(z.read('xl/worksheets/sheet17.xml'))
-                rows = ref_sheet_xml.findall('.//m:sheetData/m:row', ns)
-                
-                for r_idx, row in enumerate(rows[1:], start=2):  # Saltar encabezado
-                    cells = row.findall('m:c', ns)
-                    if len(cells) >= 6:
-                        vals = []
-                        for c in cells[:6]:
-                            t = c.attrib.get('t')
-                            v = c.find('m:v', ns)
-                            if v is None:
-                                vals.append('')
-                            else:
-                                raw = v.text or ''
-                                if t == 's':
-                                    vals.append(sst[int(raw)] if raw.isdigit() and int(raw) < len(sst) else raw)
-                                else:
-                                    vals.append(raw)
-                        
-                        try:
-                            nic = int(vals[0])
-                            referencias_dict[nic] = {
-                                'sector': vals[1] if vals[1] else None,
-                                'denominacion': vals[2] if vals[2] else None,
-                                'tarifa': vals[3] if vals[3] else None,
-                                'combinacion': vals[4] if vals[4] else None,
-                                'sector_macro': vals[5] if vals[5] else None,
-                            }
-                        except:
-                            continue
-            
-            print(f"Cargadas {len(referencias_dict)} referencias NIC desde Excel")
-        except Exception as e:
-            print(f"No se pudo cargar referencias del Excel: {e}")
+    backend_dir = Path(__file__).parent
+    referencias_dict = cargar_maestro_nics(backend_dir)
     
     # Mapear referencias a mediciones
     print("Mapeando referencias a mediciones...")
@@ -240,6 +319,17 @@ def ingestar_csv(csv_path: str, db: Session):
             df.at[idx, 'sector_macro'] = ref['sector_macro']
             df.at[idx, 'referencia'] = ref['combinacion']  # REFERENCIA = COMBINACION (con NIC)
             df.at[idx, 'tipo'] = 'Medición'  # tipo por defecto
+
+    # Fallback de segmentacion para NICs sin maestro.
+    df['sector_macro'] = df.get('sector_macro', pd.Series(index=df.index)).fillna(df['DEPARTAMENTO'])
+    df['sector'] = df.get('sector', pd.Series(index=df.index)).fillna(df['LOCALIDAD'])
+    df['denominacion'] = df.get('denominacion', pd.Series(index=df.index)).fillna(df['CLIENTE'])
+
+    combinacion_fallback = (
+        df['CLIENTE'].astype(str).str.strip().replace('nan', '') + '-' + df['nic'].astype(str)
+    )
+    df['combinacion'] = df.get('combinacion', pd.Series(index=df.index)).fillna(combinacion_fallback)
+    df['referencia'] = df.get('referencia', pd.Series(index=df.index)).fillna(df['combinacion'])
     
     # Mapear tipo desde VLOOKUP (columna AF en BASE DATOS)
     # Por ahora usar tarifa para deducir tipo
@@ -254,14 +344,18 @@ def ingestar_csv(csv_path: str, db: Session):
         else:
             return 'Otros'
     
-    df['tipo'] = df['TARIFA'].apply(deducir_tipo)
+    df['tarifa_final'] = df.get('tarifa', pd.Series(index=df.index)).fillna(df['TARIFA'])
+    df['tipo'] = df['tarifa_final'].apply(deducir_tipo)
     
     # Insertar en BD
     print("Insertando datos en PostgreSQL...")
-    
-    # Primero limpiar datos existentes (opcional)
-    # db.query(models.Medicion).delete()
-    # db.commit()
+
+    # En recargas completas, limpiar primero para evitar duplicados acumulados.
+    replace_existing = os.getenv("INGEST_REPLACE_EXISTING", "true").lower() == "true"
+    if replace_existing:
+        deleted = db.query(models.Medicion).delete()
+        db.commit()
+        print(f"Registros previos eliminados: {deleted}")
     
     batch_size = 1000
     registros_insertados = 0
@@ -279,12 +373,12 @@ def ingestar_csv(csv_path: str, db: Session):
                 codigo_postal=str(row['COD_POSTAL']).strip() if pd.notna(row['COD_POSTAL']) else None,
                 fecha_medicion=row['fecha_medicion'],
                 periodo=row['periodo'],
-                pot_contratada=row['pot_contratada'],
-                pot_demandada_max=row['pot_demandada_max'],
+                pot_contratada=float(row['pot_contratada']) if pd.notna(row['pot_contratada']) else None,
+                pot_demandada_max=float(row['pot_demandada_max']) if pd.notna(row['pot_demandada_max']) else None,
                 energia_total=None,  # No en CSV actual
                 importe_neto=row['importe_neto'],
                 importe_total=row['importe_total'],
-                tarifa=row['TARIFA'] if pd.notna(row['TARIFA']) else None,
+                tarifa=row['tarifa_final'] if pd.notna(row['tarifa_final']) else None,
                 referencia=row.get('referencia'),
                 tipo=row['tipo'],
                 sector=row.get('sector'),

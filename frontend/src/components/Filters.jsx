@@ -115,11 +115,25 @@ export default function Filters({ filtros, setFiltros, onLoading, onError }) {
     }))
   }
 
+  const handleFechaInicioChange = (e) => {
+    const valor = e.target.value
+    setFiltros(prev => ({
+      ...prev,
+      fechaInicio: valor,
+    }))
+  }
+
+  const handleFechaFinChange = (e) => {
+    const valor = e.target.value
+    setFiltros(prev => ({
+      ...prev,
+      fechaFin: valor,
+    }))
+  }
+
   return (
     <div className="filtros-panel">
-      <h2 style={{fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem', color: '#333'}}>
-        Filtros
-      </h2>
+      <h2 className="panel-title">Filtros</h2>
 
       <div className="filtro-row">
         <div className="filtro-group">
@@ -190,8 +204,32 @@ export default function Filters({ filtros, setFiltros, onLoading, onError }) {
         </div>
       </div>
 
+      <div className="filtro-row filtro-row-secondary">
+        <div className="filtro-group">
+          <label className="filtro-label">Fecha desde</label>
+          <input
+            type="date"
+            className="filtro-select"
+            value={filtros.fechaInicio || ''}
+            onChange={handleFechaInicioChange}
+            disabled={cargando}
+          />
+        </div>
+
+        <div className="filtro-group">
+          <label className="filtro-label">Fecha hasta</label>
+          <input
+            type="date"
+            className="filtro-select"
+            value={filtros.fechaFin || ''}
+            onChange={handleFechaFinChange}
+            disabled={cargando}
+          />
+        </div>
+      </div>
+
       {cargando && (
-        <p style={{marginTop: '1rem', color: '#888', fontSize: '0.875rem'}}>
+        <p className="filtro-loading-text">
           Cargando opciones...
         </p>
       )}

@@ -1,11 +1,18 @@
 import os
+from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 
-load_dotenv()
+# Cargar .env desde backend/ y, como fallback, desde la raiz del repo.
+app_dir = Path(__file__).resolve().parent
+backend_dir = app_dir.parent
+repo_root_dir = backend_dir.parent
+
+load_dotenv(backend_dir / ".env")
+load_dotenv(repo_root_dir / ".env")
 
 # Configurar conexión a PostgreSQL.
 # En Render/Neon esto debe venir por variable de entorno; no usar fallback silencioso.

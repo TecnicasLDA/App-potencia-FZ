@@ -67,3 +67,29 @@ class FiltrosDisponiblesResponse(BaseModel):
     sectores: List[FiltroOption]
     denominaciones: List[FiltroOption]
     nics: List[FiltroOption]
+
+
+class MaestroNicItem(BaseModel):
+    nic: int
+    referencia: Optional[str] = None
+    tipo: Optional[str] = None
+    tarifa: Optional[str] = None
+    sector_macro: Optional[str] = None
+    sector: Optional[str] = None
+    denominacion: Optional[str] = None
+    combinacion: Optional[str] = None
+
+
+class MaestroNicListResponse(BaseModel):
+    total: int
+    items: List[MaestroNicItem]
+
+
+class MaestroNicUpdate(BaseModel):
+    referencia: Optional[str] = None
+    tipo: Optional[str] = None
+    tarifa: Optional[str] = None
+    sector_macro: Optional[str] = None
+    sector: Optional[str] = None
+    denominacion: Optional[str] = None
+    combinacion: Optional[str] = None

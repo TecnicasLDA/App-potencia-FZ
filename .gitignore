@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.venv/
+venv/
+
+# Node / Vite
+node_modules/
+dist/
+
+# Env files (secrets)
+.env
+.env.*
+!.env.example
+
+# Local data files
+backend/MAESTRO_NICS.xlsx
+
+# Logs and OS
+*.log
+.DS_Store
+.vscode/
